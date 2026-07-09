@@ -43,7 +43,7 @@ void Preprocess::set(bool feat_en, int lid_type, double bld, int pfilt_num)
   point_filter_num = pfilt_num;
 }
 
-void Preprocess::process(const sensor_msgs::PointCloud2::ConstPtr &msg, PointCloudXYZI::Ptr &pcl_out)
+void Preprocess::process(const sensor_msgs::msg::PointCloud2::SharedPtr &msg, PointCloudXYZI::Ptr &pcl_out)
 {
   switch (lidar_type)
   {
@@ -57,7 +57,7 @@ void Preprocess::process(const sensor_msgs::PointCloud2::ConstPtr &msg, PointClo
   *pcl_out = pl_surf;
 }
 
-void Preprocess::rsairy_handler(const sensor_msgs::PointCloud2::ConstPtr &msg)
+void Preprocess::rsairy_handler(const sensor_msgs::msg::PointCloud2::SharedPtr &msg)
 {
   pl_surf.clear();
   pl_corn.clear();
@@ -94,13 +94,13 @@ void Preprocess::rsairy_handler(const sensor_msgs::PointCloud2::ConstPtr &msg)
 }
 
 #ifdef MID360_SUPPORT
-void Preprocess::process(const livox_ros_driver::CustomMsg::ConstPtr &msg, PointCloudXYZI::Ptr &pcl_out)
+void Preprocess::process(const livox_ros_driver2::msg::CustomMsg::SharedPtr &msg, PointCloudXYZI::Ptr &pcl_out)
 {
   mid360_handler(msg);
   *pcl_out = pl_surf;
 }
 
-void Preprocess::mid360_handler(const livox_ros_driver::CustomMsg::ConstPtr &msg)
+void Preprocess::mid360_handler(const livox_ros_driver2::msg::CustomMsg::SharedPtr &msg)
 {
   pl_surf.clear();
   pl_corn.clear();

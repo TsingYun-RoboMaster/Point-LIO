@@ -1,7 +1,9 @@
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 #include <pcl_conversions/pcl_conversions.h>
-#include <sensor_msgs/PointCloud2.h>
-#include <livox_ros_driver/CustomMsg.h>
+#include <sensor_msgs/msg/point_cloud2.hpp>
+#ifdef MID360_SUPPORT
+#include <livox_ros_driver2/msg/custom_msg.hpp>
+#endif
 
 using namespace std;
 
@@ -60,9 +62,9 @@ class Preprocess
   Preprocess();
   ~Preprocess();
 
-  void process(const sensor_msgs::PointCloud2::ConstPtr &msg, PointCloudXYZI::Ptr &pcl_out);
+  void process(const sensor_msgs::msg::PointCloud2::SharedPtr &msg, PointCloudXYZI::Ptr &pcl_out);
 #ifdef MID360_SUPPORT
-  void process(const livox_ros_driver::CustomMsg::ConstPtr &msg, PointCloudXYZI::Ptr &pcl_out);
+  void process(const livox_ros_driver2::msg::CustomMsg::SharedPtr &msg, PointCloudXYZI::Ptr &pcl_out);
 #endif
   void set(bool feat_en, int lid_type, double bld, int pfilt_num);
 
@@ -76,9 +78,9 @@ class Preprocess
 
 
   private:
-  void rsairy_handler(const sensor_msgs::PointCloud2::ConstPtr &msg);
+  void rsairy_handler(const sensor_msgs::msg::PointCloud2::SharedPtr &msg);
 #ifdef MID360_SUPPORT
-  void mid360_handler(const livox_ros_driver::CustomMsg::ConstPtr &msg);
+  void mid360_handler(const livox_ros_driver2::msg::CustomMsg::SharedPtr &msg);
 #endif
   void give_feature(PointCloudXYZI &pl, vector<orgtype> &types);
   int  plane_judge(const PointCloudXYZI &pl, vector<orgtype> &types, uint i, uint &i_nex, Eigen::Vector3d &curr_direct);
