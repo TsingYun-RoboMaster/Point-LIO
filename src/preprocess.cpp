@@ -45,7 +45,15 @@ void Preprocess::set(bool feat_en, int lid_type, double bld, int pfilt_num)
 
 void Preprocess::process(const sensor_msgs::PointCloud2::ConstPtr &msg, PointCloudXYZI::Ptr &pcl_out)
 {
-  rsairy_handler(msg);
+  switch (lidar_type)
+  {
+  case RSAIRY:
+    rsairy_handler(msg);
+    break;
+  default:
+    printf("Error LiDAR Type");
+    break;
+  }
   *pcl_out = pl_surf;
 }
 
