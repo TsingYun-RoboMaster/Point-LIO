@@ -45,10 +45,45 @@ void Preprocess::set(bool feat_en, int lid_type, double bld, int pfilt_num)
 
 void Preprocess::process(const sensor_msgs::PointCloud2::ConstPtr &msg, PointCloudXYZI::Ptr &pcl_out)
 {
-  // TODO: RSAIRY handler (Step 3)
+  rsairy_handler(msg);
   *pcl_out = pl_surf;
 }
 
+void Preprocess::rsairy_handler(const sensor_msgs::PointCloud2::ConstPtr &msg)
+{
+  pl_surf.clear();
+  pl_corn.clear();
+  pl_full.clear();
+
+  pcl::PointCloud<rsairy_ros::Point> pl_orig;
+  pcl::fromROSMsg(*msg, pl_orig);
+  int plsize = pl_orig.size();
+  if (plsize == 0) return;
+  pl_surf.reserve(plsize);
+
+  for (int i = 0; i < plsize; i++)
+  {
+    if (i % point_filter_num != 0) continue;
+
+    PointType added_pt;
+    added_pt.normal_x = 0;
+    added_pt.normal_y = 0;
+    added_pt.normal_z = 0;
+    added_pt.x = pl_orig.points[i].x;
+    added_pt.y = pl_orig.points[i].y;
+    added_pt.z = pl_orig.points[i].z;
+    added_pt.intensity = pl_orig.points[i].intensity;
+    added_pt.curvature = pl_orig.points[i].timestamp * 1000.0; // s -> ms
+
+    double dist = added_pt.x * added_pt.x + added_pt.y * added_pt.y + added_pt.z * added_pt.z;
+    if (dist < blind * blind || dist > det_range * det_range) continue;
+    if (std::isnan(added_pt.x) || std::isnan(added_pt.y) || std::isnan(added_pt.z)) continue;
+
+    pl_surf.points.push_back(added_pt);
+  }
+
+  sort(pl_surf.points.begin(), pl_surf.points.end(), time_list_cut_frame);
+}
 
 void Preprocess::give_feature(pcl::PointCloud<PointType> &pl, vector<orgtype> &types)
 {
