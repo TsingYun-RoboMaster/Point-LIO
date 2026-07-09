@@ -61,6 +61,9 @@ class Preprocess
   ~Preprocess();
 
   void process(const sensor_msgs::PointCloud2::ConstPtr &msg, PointCloudXYZI::Ptr &pcl_out);
+#ifdef MID360_SUPPORT
+  void process(const livox_ros_driver::CustomMsg::ConstPtr &msg, PointCloudXYZI::Ptr &pcl_out);
+#endif
   void set(bool feat_en, int lid_type, double bld, int pfilt_num);
 
   PointCloudXYZI pl_full, pl_corn, pl_surf;
@@ -74,6 +77,9 @@ class Preprocess
 
   private:
   void rsairy_handler(const sensor_msgs::PointCloud2::ConstPtr &msg);
+#ifdef MID360_SUPPORT
+  void mid360_handler(const livox_ros_driver::CustomMsg::ConstPtr &msg);
+#endif
   void give_feature(PointCloudXYZI &pl, vector<orgtype> &types);
   int  plane_judge(const PointCloudXYZI &pl, vector<orgtype> &types, uint i, uint &i_nex, Eigen::Vector3d &curr_direct);
   bool small_plane(const PointCloudXYZI &pl, vector<orgtype> &types, uint i_cur, uint &i_nex, Eigen::Vector3d &curr_direct);

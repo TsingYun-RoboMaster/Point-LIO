@@ -85,6 +85,60 @@ void Preprocess::rsairy_handler(const sensor_msgs::PointCloud2::ConstPtr &msg)
   sort(pl_surf.points.begin(), pl_surf.points.end(), time_list_cut_frame);
 }
 
+#ifdef MID360_SUPPORT
+void Preprocess::process(const livox_ros_driver::CustomMsg::ConstPtr &msg, PointCloudXYZI::Ptr &pcl_out)
+{
+  mid360_handler(msg);
+  *pcl_out = pl_surf;
+}
+
+void Preprocess::mid360_handler(const livox_ros_driver::CustomMsg::ConstPtr &msg)
+{
+  pl_surf.clear();
+  pl_corn.clear();
+  pl_full.clear();
+
+  int plsize = msg->point_num;
+  pl_surf.reserve(plsize);
+
+  for (int i = 0; i < N_SCANS; i++)
+  {
+    pl_buff[i].clear();
+    pl_buff[i].reserve(plsize);
+  }
+
+  for (uint i = 1; i < plsize; i++)
+  {
+    if ((msg->points[i].line < N_SCANS) &&
+        ((msg->points[i].tag & 0x30) == 0x10 || (msg->points[i].tag & 0x30) == 0x00))
+    {
+      if (i % point_filter_num != 0) continue;
+
+      PointType added_pt;
+      added_pt.normal_x = 0;
+      added_pt.normal_y = 0;
+      added_pt.normal_z = 0;
+      added_pt.x = msg->points[i].x;
+      added_pt.y = msg->points[i].y;
+      added_pt.z = msg->points[i].z;
+      added_pt.intensity = msg->points[i].reflectivity;
+      added_pt.curvature = msg->points[i].offset_time / 1000000.0; // ns -> ms
+
+      double dist = added_pt.x * added_pt.x + added_pt.y * added_pt.y + added_pt.z * added_pt.z;
+      if (dist < blind * blind || dist > det_range * det_range) continue;
+      if ((abs(added_pt.x - msg->points[i-1].x) > 1e-7) ||
+          (abs(added_pt.y - msg->points[i-1].y) > 1e-7) ||
+          (abs(added_pt.z - msg->points[i-1].z) > 1e-7))
+      {
+        pl_surf.push_back(added_pt);
+      }
+    }
+  }
+
+  sort(pl_surf.points.begin(), pl_surf.points.end(), time_list_cut_frame);
+}
+#endif
+
 void Preprocess::give_feature(pcl::PointCloud<PointType> &pl, vector<orgtype> &types)
 {
   int plsize = pl.size();
