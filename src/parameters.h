@@ -1,7 +1,7 @@
 // #ifndef PARAM_H
 // #define PARAM_H
 #pragma once
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 #include <Eigen/Eigen>
 #include <Eigen/Core>
 #include <cstring>
@@ -76,7 +76,7 @@ extern double time_update_last, time_current, time_predict_last_const, t_last;
 extern MeasureGroup Measures;
 
 extern ofstream fout_out, fout_imu_pbp;
-void readParameters(ros::NodeHandle &n);
+void readParameters(rclcpp::Node &node);
 void open_file();
 Eigen::Matrix<double, 3, 1> SO3ToEuler(const SO3 &orient);
 void reset_cov(Eigen::Matrix<double, 24, 24> & P_init);
