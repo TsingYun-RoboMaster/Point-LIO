@@ -1,19 +1,17 @@
-// #include <so3_math.h>
-#include <nav_msgs/Odometry.h>
-#include <nav_msgs/Path.h>
-#include <visualization_msgs/Marker.h>
+#include <rclcpp/rclcpp.hpp>
+#include <nav_msgs/msg/odometry.hpp>
+#include <nav_msgs/msg/path.hpp>
+#include <geometry_msgs/msg/transform_stamped.hpp>
+#include <sensor_msgs/msg/imu.hpp>
+#include <sensor_msgs/msg/point_cloud2.hpp>
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/io/pcd_io.h>
-#include <tf/transform_datatypes.h>
-#include <tf/transform_broadcaster.h>
+#include <tf2_ros/transform_broadcaster.h>
 #include "li_initialization.h"
 #include <malloc.h>
-// #include <cv_bridge/cv_bridge.h>
-// #include "matplotlibcpp.h"
-// #include <ros/console.h>
 
 using namespace std;     
 
@@ -42,9 +40,9 @@ pcl::VoxelGrid<PointType> downSizeFilterMap;
 
 V3D euler_cur;
 
-nav_msgs::Path path;
-nav_msgs::Odometry odomAftMapped;
-geometry_msgs::PoseStamped msg_body_pose;
+nav_msgs::msg::Path path;
+nav_msgs::msg::Odometry odomAftMapped;
+geometry_msgs::msg::PoseStamped msg_body_pose;
 
 void SigHandle(int sig)
 {
@@ -149,22 +147,22 @@ void MapIncremental() {
     ivox_->AddPoints(points_to_add);
 }
 
-void publish_init_map(const ros::Publisher & pubLaserCloudFullRes)
+void publish_init_map(const rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr & pubLaserCloudFullRes)
 {
     int size_init_map = init_feats_world->size();
 
-    sensor_msgs::PointCloud2 laserCloudmsg;
-                
+    sensor_msgs::msg::PointCloud2 laserCloudmsg;
+
     pcl::toROSMsg(*init_feats_world, laserCloudmsg);
-        
-    laserCloudmsg.header.stamp = ros::Time().fromSec(lidar_end_time);
+
+    laserCloudmsg.header.stamp = rclcpp::Time(static_cast<int64_t>(lidar_end_time * 1e9));
     laserCloudmsg.header.frame_id = "camera_init";
-    pubLaserCloudFullRes.publish(laserCloudmsg);
+    pubLaserCloudFullRes->publish(laserCloudmsg);
 }
 
 PointCloudXYZI::Ptr pcl_wait_pub(new PointCloudXYZI(500000, 1));
 PointCloudXYZI::Ptr pcl_wait_save(new PointCloudXYZI());
-void publish_frame_world(const ros::Publisher & pubLaserCloudFullRes)
+void publish_frame_world(const rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr & pubLaserCloudFullRes)
 {
     if (scan_pub_en)
     {
@@ -172,21 +170,20 @@ void publish_frame_world(const ros::Publisher & pubLaserCloudFullRes)
         int size = laserCloudFullRes->points.size();
 
         PointCloudXYZI::Ptr   laserCloudWorld(new PointCloudXYZI(size, 1));
-        
+
         for (int i = 0; i < size; i++)
         {
             laserCloudWorld->points[i].x = feats_down_world->points[i].x;
             laserCloudWorld->points[i].y = feats_down_world->points[i].y;
             laserCloudWorld->points[i].z = feats_down_world->points[i].z;
-            laserCloudWorld->points[i].intensity = feats_down_world->points[i].intensity; // feats_down_world->points[i].y; //
+            laserCloudWorld->points[i].intensity = feats_down_world->points[i].intensity;
         }
-        sensor_msgs::PointCloud2 laserCloudmsg;
+        sensor_msgs::msg::PointCloud2 laserCloudmsg;
         pcl::toROSMsg(*laserCloudWorld, laserCloudmsg);
-        
-        laserCloudmsg.header.stamp = ros::Time().fromSec(lidar_end_time);
+
+        laserCloudmsg.header.stamp = rclcpp::Time(static_cast<int64_t>(lidar_end_time * 1e9));
         laserCloudmsg.header.frame_id = "camera_init";
-        pubLaserCloudFullRes.publish(laserCloudmsg);
-        // publish_count -= PUBFRAME_PERIOD;
+        pubLaserCloudFullRes->publish(laserCloudmsg);
     }
     
     /**************** save map ****************/
@@ -222,7 +219,7 @@ void publish_frame_world(const ros::Publisher & pubLaserCloudFullRes)
     }
 }
 
-void publish_frame_body(const ros::Publisher & pubLaserCloudFull_body)
+void publish_frame_body(const rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr & pubLaserCloudFull_body)
 {
     int size = feats_undistort->points.size();
     PointCloudXYZI::Ptr laserCloudIMUBody(new PointCloudXYZI(size, 1));
@@ -233,12 +230,11 @@ void publish_frame_body(const ros::Publisher & pubLaserCloudFull_body)
                             &laserCloudIMUBody->points[i]);
     }
 
-    sensor_msgs::PointCloud2 laserCloudmsg;
+    sensor_msgs::msg::PointCloud2 laserCloudmsg;
     pcl::toROSMsg(*laserCloudIMUBody, laserCloudmsg);
-    laserCloudmsg.header.stamp = ros::Time().fromSec(lidar_end_time);
+    laserCloudmsg.header.stamp = rclcpp::Time(static_cast<int64_t>(lidar_end_time * 1e9));
     laserCloudmsg.header.frame_id = "body";
-    pubLaserCloudFull_body.publish(laserCloudmsg);
-    // publish_count -= PUBFRAME_PERIOD;
+    pubLaserCloudFull_body->publish(laserCloudmsg);
 }
 
 template<typename T>
@@ -268,62 +264,58 @@ void set_posestamp(T & out)
     }
 }
 
-void publish_odometry(const ros::Publisher & pubOdomAftMapped)
+void publish_odometry(const rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr & pubOdomAftMapped,
+                      const std::shared_ptr<tf2_ros::TransformBroadcaster> & tf_broadcaster)
 {
     odomAftMapped.header.frame_id = "camera_init";
     odomAftMapped.child_frame_id = "body";
     if (publish_odometry_without_downsample)
     {
-        odomAftMapped.header.stamp = ros::Time().fromSec(time_current);
+        odomAftMapped.header.stamp = rclcpp::Time(static_cast<int64_t>(time_current * 1e9));
     }
     else
     {
-        odomAftMapped.header.stamp = ros::Time().fromSec(lidar_end_time);
+        odomAftMapped.header.stamp = rclcpp::Time(static_cast<int64_t>(lidar_end_time * 1e9));
     }
     set_posestamp(odomAftMapped.pose.pose);
-    
-    pubOdomAftMapped.publish(odomAftMapped);
 
-    static tf::TransformBroadcaster br;
-    tf::Transform                   transform;
-    tf::Quaternion                  q;
-    transform.setOrigin(tf::Vector3(odomAftMapped.pose.pose.position.x, \
-                                    odomAftMapped.pose.pose.position.y, \
-                                    odomAftMapped.pose.pose.position.z));
-    q.setW(odomAftMapped.pose.pose.orientation.w);
-    q.setX(odomAftMapped.pose.pose.orientation.x);
-    q.setY(odomAftMapped.pose.pose.orientation.y);
-    q.setZ(odomAftMapped.pose.pose.orientation.z);
-    transform.setRotation( q );
-    br.sendTransform( tf::StampedTransform( transform, odomAftMapped.header.stamp, "camera_init", "body") );
+    pubOdomAftMapped->publish(odomAftMapped);
+
+    geometry_msgs::msg::TransformStamped transform;
+    transform.header.stamp = odomAftMapped.header.stamp;
+    transform.header.frame_id = "camera_init";
+    transform.child_frame_id = "body";
+    transform.transform.translation.x = odomAftMapped.pose.pose.position.x;
+    transform.transform.translation.y = odomAftMapped.pose.pose.position.y;
+    transform.transform.translation.z = odomAftMapped.pose.pose.position.z;
+    transform.transform.rotation = odomAftMapped.pose.pose.orientation;
+    tf_broadcaster->sendTransform(transform);
 }
 
-void publish_path(const ros::Publisher pubPath)
+void publish_path(const rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr & pubPath)
 {
     set_posestamp(msg_body_pose.pose);
-    // msg_body_pose.header.stamp = ros::Time::now();
-    msg_body_pose.header.stamp = ros::Time().fromSec(lidar_end_time);
+    msg_body_pose.header.stamp = rclcpp::Time(static_cast<int64_t>(lidar_end_time * 1e9));
     msg_body_pose.header.frame_id = "camera_init";
     static int jjj = 0;
     jjj++;
-    // if (jjj % 2 == 0) // if path is too large, the rvis will crash
     {
         path.poses.emplace_back(msg_body_pose);
-        pubPath.publish(path);
+        pubPath->publish(path);
     }
 }        
 
 int main(int argc, char** argv)
 {
-    ros::init(argc, argv, "laserMapping");
-    ros::NodeHandle nh("~");
-    ros::AsyncSpinner spinner(0);
-    spinner.start();
-    readParameters(nh);
+    rclcpp::init(argc, argv);
+    auto node = std::make_shared<rclcpp::Node>("laserMapping");
+    readParameters(*node);
     cout<<"lidar_type: "<<lidar_type<<endl;
     ivox_ = std::make_shared<IVoxType>(ivox_options_);
-    
-    path.header.stamp    = ros::Time().fromSec(lidar_end_time);
+
+    auto tf_broadcaster = std::make_shared<tf2_ros::TransformBroadcaster>(*node);
+
+    path.header.stamp    = rclcpp::Time(static_cast<int64_t>(lidar_end_time * 1e9));
     path.header.frame_id ="camera_init";
 
     /*** variables definition for counting ***/

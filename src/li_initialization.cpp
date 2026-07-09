@@ -22,14 +22,14 @@ std::deque<PointCloudXYZI::Ptr>  lidar_buffer;
 std::deque<double>               time_buffer;
 std::deque<sensor_msgs::Imu::Ptr> imu_deque;
 
-void standard_pcl_cbk(const sensor_msgs::PointCloud2::ConstPtr &msg) 
+void standard_pcl_cbk(const sensor_msgs::msg::PointCloud2::SharedPtr &msg)
 {
     // mtx_buffer.lock();
     scan_count ++;
     double preprocess_start_time = omp_get_wtime();
-    if (msg->header.stamp.toSec() < last_timestamp_lidar)
+    if (rclcpp::Time(msg->header.stamp).seconds() < last_timestamp_lidar)
     {
-        ROS_ERROR("lidar loop back, clear buffer");
+        RCLCPP_ERROR(rclcpp::get_logger("laserMapping"), "lidar loop back, clear buffer");
         // lidar_buffer.shrink_to_fit();
 
         // mtx_buffer.unlock();
