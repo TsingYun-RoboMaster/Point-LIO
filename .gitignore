@@ -1,0 +1,47 @@
+# Build
+build/
+install/
+log/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Compiled
+*.o
+*.obj
+*.exe
+*.out
+*.a
+*.so
+*.dylib
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+CTestTestfile.cmake
+Makefile
+compile_commands.json
+
+# ROS / colcon
+devel/
+.catkin_tools/
+
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+
+# PCD files (debug output)
+PCD/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
