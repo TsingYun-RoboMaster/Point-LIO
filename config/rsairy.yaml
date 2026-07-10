@@ -1,0 +1,75 @@
+point_lio:
+  ros__parameters:
+    # LiDAR configuration
+    preprocess.lidar_type: 1               # RSAIRY = 1
+    preprocess.scan_line: 96               # Airy 96-line
+    preprocess.scan_rate: 10               # 10 Hz
+    preprocess.timestamp_unit: 0           # SEC = 0 (rs_driver timestamps in seconds)
+    preprocess.blind: 0.3                  # min range (m)
+    point_filter_num: 1                    # decimation
+
+    # Topics
+    common.lid_topic: "/rslidar_points"
+    common.imu_topic: "/rslidar_imu_data"
+
+    # Mapping
+    mapping.imu_en: true
+    mapping.extrinsic_est_en: false
+    mapping.imu_time_inte: 0.005
+    mapping.lidar_meas_cov: 0.001
+    mapping.acc_cov_input: 0.1
+    mapping.gyr_cov_input: 0.1
+    mapping.vel_cov: 0.1
+    mapping.acc_cov_output: 0.1
+    mapping.gyr_cov_output: 0.1
+    mapping.b_gyr_cov: 0.0001
+    mapping.b_acc_cov: 0.0001
+    mapping.imu_meas_acc_cov: 0.1
+    mapping.imu_meas_omg_cov: 0.1
+    mapping.satu_acc: 30.0
+    mapping.satu_gyro: 35.0
+    mapping.acc_norm: 1.0                 # IMU outputs in [g]
+    mapping.plane_thr: 0.1
+    mapping.det_range: 200.0
+    mapping.fov_degree: 180.0
+    mapping.match_s: 81.0
+    mapping.ivox_grid_resolution: 0.2
+    mapping.lidar_time_inte: 0.1
+
+    # IMU
+    prop_at_freq_of_imu: true
+    use_imu_as_input: false
+    check_satu: true
+    init_map_size: 10
+    space_down_sample: true
+    filter_size_surf: 0.5
+    filter_size_map: 0.5
+
+    # Extrinsic (LiDAR in IMU frame)
+    mapping.extrinsic_T: [0.0, 0.0, 0.0]
+    mapping.extrinsic_R: [1.0, 0.0, 0.0,
+                          0.0, 1.0, 0.0,
+                          0.0, 0.0, 1.0]
+    mapping.gravity: [0.0, 0.0, -9.81]
+    mapping.gravity_init: [0.0, 0.0, -9.81]
+
+    # Common
+    common.time_diff_lidar_to_imu: 0.0
+    common.con_frame: false
+    common.cut_frame: false
+
+    # Odometry
+    odometry.publish_odometry_without_downsample: false
+
+    # Publishing
+    publish.path_en: true
+    publish.scan_publish_en: true
+    publish.scan_bodyframe_pub_en: true
+    runtime_pos_log_enable: false
+
+    # PCD save
+    pcd_save.pcd_save_en: false
+    pcd_save.interval: -1
+
+    # IVox
+    ivox_nearby_type: 18
