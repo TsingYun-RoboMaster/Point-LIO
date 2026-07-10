@@ -27,8 +27,10 @@ extern PointCloudXYZI::Ptr  ptr_con;
 extern double T1[MAXN], s_plot[MAXN], s_plot2[MAXN], s_plot3[MAXN], s_plot11[MAXN];
 
 void standard_pcl_cbk(const sensor_msgs::msg::PointCloud2::SharedPtr &msg);
-void livox_pcl_cbk(const livox_ros_driver::CustomMsg::ConstPtr &msg);
-void imu_cbk(const sensor_msgs::msg::Imu::SharedPtr &msg_in);
+#ifdef MID360_SUPPORT
+void livox_pcl_cbk(const livox_ros_driver2::msg::CustomMsg::SharedPtr &msg);
+#endif
+void imu_cbk(const sensor_msgs::msg::Imu::ConstSharedPtr &msg_in);
 bool sync_packages(MeasureGroup &meas);
 
 // #endif

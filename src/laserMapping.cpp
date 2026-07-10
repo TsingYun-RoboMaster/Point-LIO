@@ -47,7 +47,7 @@ geometry_msgs::msg::PoseStamped msg_body_pose;
 void SigHandle(int sig)
 {
     flg_exit = true;
-    RCLCPP_WARN("catch sig %d", sig);
+    RCLCPP_WARN(rclcpp::get_logger("laserMapping"), "catch sig %d", sig);
     sig_buffer.notify_all();
 }
 
@@ -701,7 +701,7 @@ int main(int argc, char** argv)
                     {
                         /******* Publish odometry *******/
 
-                        publish_odometry(pubOdomAftMapped);
+                        publish_odometry(pubOdomAftMapped, tf_broadcaster);
                         if (runtime_pos_log)
                         {
                             euler_cur = SO3ToEuler(kf_output.x_.rot);
@@ -894,7 +894,7 @@ int main(int argc, char** argv)
                     {
                         /******* Publish odometry *******/
 
-                        publish_odometry(pubOdomAftMapped);
+                        publish_odometry(pubOdomAftMapped, tf_broadcaster);
                         if (runtime_pos_log)
                         {
                             euler_cur = SO3ToEuler(kf_input.x_.rot);
@@ -994,7 +994,7 @@ int main(int argc, char** argv)
             /******* Publish odometry downsample *******/
             if (!publish_odometry_without_downsample)
             {
-                publish_odometry(pubOdomAftMapped);
+                publish_odometry(pubOdomAftMapped, tf_broadcaster);
             }
 
             /*** add the feature points to map ***/
