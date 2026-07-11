@@ -7,9 +7,6 @@
 #include <cstring>
 #include "preprocess.h"
 #include "IMU_Processing.h"
-#include <sensor_msgs/NavSatFix.h>
-#include <livox_ros_driver/CustomMsg.h>
-#include <sensor_msgs/PointCloud2.h>
 #include <mutex>
 #include <omp.h>
 #include <math.h>
@@ -20,9 +17,7 @@
 #include <ivox/ivox3d.h>
 #include <Python.h>
 #include <condition_variable>
-#include <sensor_msgs/Imu.h>
 #include <pcl/common/transforms.h>
-#include <geometry_msgs/Vector3.h>
 
 // #define IVOX_NODE_TYPE_PHC
 

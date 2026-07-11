@@ -392,7 +392,7 @@ int main(int argc, char** argv)
         {
             if (flg_reset)
             {
-                RCLCPP_WARN("reset when rosbag play back");
+                RCLCPP_WARN(rclcpp::get_logger("laserMapping"), "reset when rosbag play back");
                 p_imu->Reset();
                 feats_undistort.reset(new PointCloudXYZI());
                 if (use_imu_as_input)
@@ -686,7 +686,7 @@ int main(int argc, char** argv)
 
                     if (feats_down_size < 1)
                     {
-                        RCLCPP_WARN("No point, skip this scan!\n");
+                        RCLCPP_WARN(rclcpp::get_logger("laserMapping"), "No point, skip this scan!");
                         idx += time_seq[k];
                         continue;
                     }
@@ -877,7 +877,7 @@ int main(int argc, char** argv)
                     
                     if (feats_down_size < 1)
                     {
-                        RCLCPP_WARN("No point, skip this scan!\n");
+                        RCLCPP_WARN(rclcpp::get_logger("laserMapping"), "No point, skip this scan!");
 
                         idx += time_seq[k];
                         continue;
