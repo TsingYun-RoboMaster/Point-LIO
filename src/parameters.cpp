@@ -124,7 +124,6 @@ void readParameters(rclcpp::Node &nh)
   p_pre->N_SCANS = nh.get_parameter("preprocess.scan_line").as_int();
   nh.declare_parameter<int>("preprocess.scan_rate", 10);
   p_pre->SCAN_RATE = nh.get_parameter("preprocess.scan_rate").as_int();
-  nh.declare_parameter<int>("preprocess.timestamp_unit", 0);
   p_pre->time_unit = nh.get_parameter("preprocess.timestamp_unit").as_int();
   nh.declare_parameter<double>("mapping.match_s", 81.0);
   match_s = nh.get_parameter("mapping.match_s").as_double();

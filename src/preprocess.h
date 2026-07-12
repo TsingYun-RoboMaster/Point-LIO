@@ -71,10 +71,8 @@ class Preprocess
   PointCloudXYZI pl_full, pl_corn, pl_surf;
   PointCloudXYZI pl_buff[128];
   vector<orgtype> typess[128];
-  float time_unit_scale;
-  int lidar_type, point_filter_num, N_SCANS, SCAN_RATE, time_unit;
+  int lidar_type, point_filter_num, N_SCANS, SCAN_RATE;
   double blind, det_range;
-  bool given_offset_time;
 
 
   private:

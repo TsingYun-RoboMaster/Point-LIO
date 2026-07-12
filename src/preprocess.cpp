@@ -51,7 +51,7 @@ void Preprocess::process(const sensor_msgs::msg::PointCloud2::SharedPtr &msg, Po
     rsairy_handler(msg);
     break;
   default:
-    printf("Error LiDAR Type");
+    RCLCPP_ERROR(rclcpp::get_logger("point_lio"), "Error LiDAR Type: %d", lidar_type);
     break;
   }
   *pcl_out = pl_surf;
@@ -153,7 +153,7 @@ void Preprocess::give_feature(pcl::PointCloud<PointType> &pl, vector<orgtype> &t
   int plsize2;
   if(plsize == 0)
   {
-    printf("something wrong\n");
+    RCLCPP_ERROR(rclcpp::get_logger("point_lio"), "give_feature: empty point cloud");
     return;
   }
   uint head = 0;

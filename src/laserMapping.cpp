@@ -363,8 +363,16 @@ int main(int argc, char** argv)
     open_file();
 
     /*** ROS subscribe initialization ***/
-    auto sub_pcl = node->create_subscription<sensor_msgs::msg::PointCloud2>(
-        lid_topic, rclcpp::SensorDataQoS(), standard_pcl_cbk);
+#ifdef MID360_SUPPORT
+    if (lidar_type == MID360) {
+        auto sub_pcl = node->create_subscription<livox_ros_driver2::msg::CustomMsg>(
+            lid_topic, rclcpp::SensorDataQoS(), livox_pcl_cbk);
+    } else
+#endif
+    {
+        auto sub_pcl = node->create_subscription<sensor_msgs::msg::PointCloud2>(
+            lid_topic, rclcpp::SensorDataQoS(), standard_pcl_cbk);
+    }
     auto sub_imu = node->create_subscription<sensor_msgs::msg::Imu>(
         imu_topic, rclcpp::SensorDataQoS(), imu_cbk);
 
